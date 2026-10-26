@@ -1,5 +1,7 @@
 # imagegen-via-codex
 
+**Image generation for Claude Code, via the Codex CLI**
+
 English | [日本語](README.ja.md)
 
 A Claude Code skill that asks the Codex CLI to generate images, then has Claude open and check the result.

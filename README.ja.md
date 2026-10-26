@@ -1,5 +1,7 @@
 # imagegen-via-codex
 
+**Claude Code のための画像生成（Codex CLI 経由）**
+
 [English](README.md) | 日本語
 
 Claude CodeからCodex CLIに画像生成を依頼し、できた画像をClaudeが確認するためのスキルです。
