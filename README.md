@@ -1,68 +1,75 @@
 # imagegen-via-codex
 
-Claude CodeからCodex CLIに画像生成を依頼し、できた画像をClaudeが確認するためのスキルです。
+English | [日本語](README.ja.md)
 
-Claude Codeで作業しているときに、イラストやサムネイルもそのまま頼めるように作りました。Claudeが画像の内容を整理してCodexに依頼し、保存された画像を開いて確認します。指示と違うところがあれば、修正を依頼します。
+A Claude Code skill that asks the Codex CLI to generate images, then has Claude open and check the result.
 
-本体は [SKILL.md](SKILL.md) 1枚です。独自のサーバーやAPIキー管理機能はありません。
+I made it so I could ask for illustrations and thumbnails without leaving Claude Code. Claude turns your request into a structured spec, hands it to Codex, opens the saved image, and asks for a fix if something doesn't match.
 
-## 使用例：架空の七味唐辛子ポスター
+The skill is [SKILL.md](SKILL.md) plus one small helper ([scripts/trash_codex_copies.py](scripts/trash_codex_copies.py)) that cleans up the image copies Codex leaves behind. There is no server and no API-key management.
 
-作者が実際に使ったときの画面です。次の短い依頼から、Claudeが画像の構図や配色、入れる文字を考えてCodexに生成を依頼しています。
+> **Note:** The skill instructions (SKILL.md) and the screenshots below are in Japanese. Claude reads the instructions as they are, whatever language you write your request in.
+
+## Example: a poster for a fictional shichimi spice brand
+
+These are screenshots from my own use. From this short request (in Japanese), Claude worked out the layout, colors and text, and asked Codex to generate the image.
 
 > 画像生成のスキル試したい
 > かっこいい架空の七味唐辛子ポスター作って
+>
+> *(I want to try the image generation skill. Make a cool poster for a fictional shichimi spice.)*
 
-### 依頼すると、Claudeがスキルを使う
+### You ask, and Claude picks the skill
 
-スキル名を指定せずに頼んだ例です。Claudeが `imagegen-via-codex` を選んでいます。
+The skill name was not given. Claude chose `imagegen-via-codex` on its own.
 
-<img src="examples/imagegen-via-codex-1.png" alt="七味唐辛子のポスターを頼むと、Claudeがimagegen-via-codexスキルを実行した画面" width="800">
+<img src="examples/imagegen-via-codex-1.png" alt="Asking for a shichimi poster; Claude runs the imagegen-via-codex skill" width="800">
 
 <details>
-<summary>Claudeが考えた内容と、Codexへの生成依頼を見る</summary>
+<summary>See what Claude planned and what it sent to Codex</summary>
 
-Claudeが架空ブランド「鬼火七味（ONIBI SHICHIMI）」を考え、黒・朱・金を使った浮世絵風のポスターとして内容を具体化しています。
+Claude invented a brand, "ONIBI SHICHIMI", and shaped the request into an ukiyo-e style poster in black, vermilion and gold.
 
-<img src="examples/imagegen-via-codex-2.png" alt="Claudeが鬼火七味という架空ブランドと、ポスターの配色・画風を提案している画面" width="800">
+<img src="examples/imagegen-via-codex-2.png" alt="Claude proposing the fictional ONIBI SHICHIMI brand and the poster's colors and style" width="800">
 
-構図、七つの薬味、背景、文字などをプロンプトにまとめ、`codex exec` で画像生成を依頼しています。
+It put the composition, the seven spices, the background and the text into a prompt and sent it with `codex exec`.
 
-<img src="examples/imagegen-via-codex-3.png" alt="Claudeが作成した詳細な画像生成プロンプトを、codex execでCodexに渡している画面" width="800">
+<img src="examples/imagegen-via-codex-3.png" alt="Claude passing a detailed image prompt to Codex with codex exec" width="800">
 
-画面は作者の利用時のものです。最新の実行手順は [SKILL.md](SKILL.md) を参照してください。
+The screenshots show the commands as they were at the time. See [SKILL.md](SKILL.md) for the current procedure.
 
 </details>
 
-### 生成した画像と、Claudeの確認結果が返ってくる
+### You get the image and Claude's check
 
-完成したポスターとともに、文字や薬味の描写についてのClaudeの確認結果が表示されています。
+The finished poster comes back with Claude's notes on the text and how the spices are drawn.
 
-<img src="examples/imagegen-via-codex-4.png" alt="完成した鬼火七味のポスターと、文字や描写を確認したClaudeの回答が表示された画面" width="800">
+<img src="examples/imagegen-via-codex-4.png" alt="The finished ONIBI SHICHIMI poster and Claude's review of its text and details" width="800">
 
-## 使うために必要なもの
+## Requirements
 
-- ローカルのコマンド実行と画像の読み取りができるClaude Code
-- 同じ実行環境にインストールされ、ログイン済みのCodex CLI
-- Codexの内蔵画像生成ツールを利用できる環境・アカウント
-- インターネット接続と、画像を保存できるフォルダ
+- Claude Code, able to run local commands and read images
+- The Codex CLI, installed in the same environment and logged in
+- An account and environment where Codex's built-in image generation tool is available
+- An internet connection and a folder to save images in
+- Python 3 (for the helper that cleans up the image copies Codex leaves behind; standard library only)
 
-**Codexにログインできることと、画像生成ツールを使えることは別です。** 利用できる機能は、アカウント、設定、バージョンなどによって変わります。このスキルを入れるだけで、どの環境でも画像生成が使えるようになるわけではありません。
+**Being able to log in to Codex is not the same as being able to use its image tool.** What's available depends on your account, settings and version. Installing this skill does not make image generation work everywhere.
 
-macOSで使っていたスキルを公開しています。Windows・Linuxでの動作は未確認です。以下のコマンド例はmacOSなどのBash・zsh向けです。
+This is a skill I use on macOS, published as is. It has not been tested on Windows or Linux. The commands below are for Bash or zsh on macOS.
 
-## インストールする
+## Install
 
-まず、Claude Codeから使うターミナルで次のコマンドを実行します。
+First, run these in the terminal that Claude Code uses:
 
 ```bash
 codex --version
 codex login status
 ```
 
-`codex` が見つからない場合は、[Codex CLIの公式案内](https://developers.openai.com/codex/cli/)に沿ってインストールしてください。未ログインの場合は `codex login` を実行します。ログイン方法は[公式ドキュメント](https://developers.openai.com/codex/auth/)で確認できます。
+If `codex` is not found, install it by following the [Codex CLI guide](https://developers.openai.com/codex/cli/). If you are not logged in, run `codex login` (see the [authentication docs](https://developers.openai.com/codex/auth/)).
 
-次に、このリポジトリをClaude Codeの個人用スキルフォルダに置きます。Gitが必要です。
+Then put this repository in your personal Claude Code skills folder. You need Git.
 
 ```bash
 mkdir -p "$HOME/.claude/skills"
@@ -70,147 +77,147 @@ git clone https://github.com/mocchicc/imagegen-via-codex.git \
   "$HOME/.claude/skills/imagegen-via-codex"
 ```
 
-すでに同名のフォルダがある場合は、このコマンドは失敗します。以前のスキルを削除せず、内容を確認してからバックアップや統合をしてください。
+If a folder with the same name already exists, this command fails. Don't delete the old skill; look at it first, then back it up or merge.
 
-Gitを使わない場合は、[SKILL.md](SKILL.md)と[scripts/trash_codex_copies.py](scripts/trash_codex_copies.py)をダウンロードし、`~/.claude/skills/imagegen-via-codex/` の下に同じ形で保存しても使えます。スキルの配置方法は[Claude Codeの公式ドキュメント](https://code.claude.com/docs/en/skills)でも確認できます。
+Without Git, you can download [SKILL.md](SKILL.md) and [scripts/trash_codex_copies.py](scripts/trash_codex_copies.py) and save them under `~/.claude/skills/imagegen-via-codex/` with the same layout. See the [Claude Code docs on skills](https://code.claude.com/docs/en/skills) for where skills go.
 
-## Claude Codeで画像を頼む
+## Asking for an image in Claude Code
 
-Claude Codeで、次のように依頼します。
-
-```text
-/imagegen-via-codex
-白い背景に、正面を向いて座る柴犬1匹の水彩イラストを作って。
-文字、ロゴ、透かしは入れないで。正方形で、images/shiba-watercolor.png に保存して。
-```
-
-スキル名を指定せず「画像を生成して」と頼んだ場合も、Claudeが内容に応じてこのスキルを選びます。選ばれないときは、上のように名前を指定してください。
-
-修正したいときは、対象のファイルと変更点を伝えます。
-
-```text
-images/shiba-watercolor.png の柴犬はそのままで、背景だけ淡い青にして。
-元のファイルは残して、images/shiba-watercolor-v2.png に保存して。
-```
-
-Claudeは、Codexに生成を依頼したあと、保存された画像を開いて確認します。結果はファイルとして保存されます。会話の中に画像を表示できるかどうかは、使っているアプリによって異なります。
-
-上の例と同じ内容をCodex CLIに依頼して生成した画像です。
-
-<img src="examples/shiba-watercolor.png" alt="白い背景に、正面を向いて座る柴犬の水彩イラスト" width="420">
-
-## 元の画像を使いたいとき
-
-会話で「この商品を使って」「元の画像を参考にして」と頼んでも、Claudeが画像の特徴を文章にしてCodexへ伝えるだけの場合があります。たとえば「黒と金の瓢箪型のボトル」と説明することと、元の商品画像を渡すことは別です。
-
-元画像を参照してほしいときは、Codexから読み取れる画像ファイルの場所と、引き継ぎたい点を明示してください。Claudeの会話に添付した画像も、自動的にCodexへ転送されるわけではありません。
+Ask like this:
 
 ```text
 /imagegen-via-codex
-images/onibi_shichimi_poster.png を参考画像としてCodexに渡して、
-製品企画用の販促スライド画像を作って。
-元のボトルの形・装飾・配色を引き継いで、横長16:9にして。
-元画像は残し、images/onibi_promo_slide.png に保存して。
+Make a watercolor illustration of one shiba inu sitting and facing forward on a white background.
+No text, logos or watermarks. Square, saved to images/shiba-watercolor.png.
 ```
 
-Claudeが実行する `codex exec` に、`--image "/画像の絶対パス.png"` または `-i "/画像の絶対パス.png"` が付いているか確認すると、画像の添付を指定したことが分かります。付いていない場合も、Codexが別途ファイルを読み込むことはありますが、商品名や特徴がプロンプトに書かれているだけでは、画像そのものを渡したとは判断できません。
+If you just say "generate an image" without the skill name, Claude picks this skill when it fits. If it doesn't, name the skill as above.
 
-作者の実利用では、元のポスターを参考画像として渡し、横長の販促スライドを生成しました。下の折りたたみ内に、`--image=onibi_shichimi_poster.png` を指定して実行している画面を、その下に完成した画像を載せています。
+To revise, name the file and what to change:
+
+```text
+Keep the shiba in images/shiba-watercolor.png as it is and make only the background pale blue.
+Keep the original and save the result to images/shiba-watercolor-v2.png.
+```
+
+After Codex generates the image, Claude opens the saved file to check it, then cleans up the copy left on the Codex side (see [What Codex leaves behind](#what-codex-leaves-behind)). The result is saved as a file. Whether the image is shown in the conversation depends on the app you use.
+
+This image was generated by sending the same request (written in Japanese) to the Codex CLI:
+
+<img src="examples/shiba-watercolor.png" alt="Watercolor illustration of a shiba inu sitting and facing forward on a white background" width="420">
+
+## Using an existing image as a reference
+
+If you just say "use this product" or "base it on the original image", Claude may only describe the image in words to Codex. Describing "a black and gold gourd-shaped bottle" is not the same as handing over the product photo.
+
+When you want Codex to look at the original, give the path of an image file Codex can read, and say what to carry over. An image attached to your Claude conversation is not forwarded to Codex automatically.
+
+```text
+/imagegen-via-codex
+Pass images/onibi_shichimi_poster.png to Codex as a reference image
+and make a promotional slide for product planning.
+Keep the bottle's shape, decoration and colors, and make it a 16:9 landscape.
+Keep the original and save to images/onibi_promo_slide.png.
+```
+
+You can tell that the image was attached if the `codex exec` command Claude runs includes `--image "/absolute/path/to/image.png"` or `-i "/absolute/path/to/image.png"`. Without it, Codex may still read the file on its own, but a product name or description in the prompt does not mean the image itself was passed.
+
+In my own use, I passed the original poster as a reference and generated a landscape promo slide. The collapsed section shows the run with `--image=onibi_shichimi_poster.png`, and the finished image follows.
 
 <details>
-<summary>画像を指定してCodexに依頼する画面を見る</summary>
+<summary>See the screen where the image is passed to Codex</summary>
 
-<img src="examples/imagegen-via-codex-reference-image.png" alt="Codex CLIの画像添付オプションを確認し、元のポスターを--imageで指定して販促スライドの生成を依頼している画面。処理は実行中" width="800">
+<img src="examples/imagegen-via-codex-reference-image.png" alt="Checking the Codex CLI image option and passing the original poster with --image to generate a promo slide; still running" width="800">
 
-画面上部の `/imagegen-via-codex --image` はClaudeへの依頼文です。このスキルに専用のオプション処理があるわけではありません。実際に確認するのは、Claudeが組み立てた `codex exec` のコマンドと、そこに指定された画像ファイルです。
+The `/imagegen-via-codex --image` at the top is just the request to Claude; the skill has no special option handling. What matters is the `codex exec` command Claude builds and the image file it passes.
 
 </details>
 
-### 元のポスターを参考にして生成した販促スライド
+### Promo slide generated from the original poster
 
-黒と金の瓢箪ボトル、赤と青の炎、舞い上がる薬味など、元のポスターの特徴を引き継いだ横長の画像です。右側に商品名や特徴、価格を配置しています。
+A landscape image that keeps the original poster's black and gold gourd bottle, red and blue flames and flying spices, with the product name, features and price on the right.
 
-<img src="examples/onibi-promo-slide.png" alt="元の鬼火七味ポスターを参考に生成した販促スライド。左に黒と金の瓢箪ボトルと赤青の炎、右に商品名・特徴・価格を配置した横長画像" width="1000">
+<img src="examples/onibi-promo-slide.png" alt="Promo slide generated from the ONIBI SHICHIMI poster: the black and gold gourd bottle with red and blue flames on the left, product name, features and price on the right" width="1000">
 
-## Claudeがプロンプトをどう組み立てるか
+## How Claude builds the prompt
 
-短い依頼でも、Claudeは「用途・被写体・画風・構図・入れる文字・入れないもの」などを項目ごとに整理した仕様にしてからCodexへ渡します。この形式は、Codexに付属する画像生成スキルと[OpenAIの画像生成プロンプトガイド](https://developers.openai.com/cookbook/examples/multimodal/image-gen-models-prompting-guide)に合わせています。
+Even for a short request, Claude first organizes it into a spec with labeled items (use, subject, style, composition, text to include, things to leave out) and then sends it to Codex. The format follows the image skill bundled with Codex and [OpenAI's image generation prompting guide](https://developers.openai.com/cookbook/examples/multimodal/image-gen-models-prompting-guide).
 
-- 「8k, masterpiece」のようなタグは使わず、目に見える内容を自然な文章で書きます。
-- 依頼にない人物・小物・キャッチコピーは足しません。
-- 画像に入れる文字は、引用符でそのまま指定します。
-- 修正では「変える点」と「残す点」を分け、残す点を毎回書き直します。直すのは1回に1点です。
+- No tag soup like "8k, masterpiece"; visible details are written as plain sentences.
+- No people, props or slogans you didn't ask for.
+- Text to appear in the image is given verbatim in quotes.
+- For revisions, Claude separates what to change from what to keep, restates what to keep every time, and changes one thing at a time.
 
-## 画像生成モデルについて
+## About the image model
 
-このスキルはCodexの内蔵画像生成ツールを使います。**使われるモデルはサービス側が選ぶため、スキルからは指定できません。** OpenAIは2026年9月にGPT Images 2.5をCodexへ展開すると発表していますが、実際にどのモデルで生成されたかは手元では確認できません。
+This skill uses Codex's built-in image tool. **The service chooses the model, so the skill can't specify it.** OpenAI announced in September 2026 that GPT Images 2.5 would roll out to Codex, but you can't confirm locally which model produced an image.
 
-`gpt-image-2.5-sunburst` などのモデルや、画質・ピクセル数を固定したい場合は、APIキーを使う別の方法（従量課金）が必要です。このスキルは、利用者の同意なしにその方法へ切り替えません。
+If you want a fixed model such as `gpt-image-2.5-sunburst`, or a fixed quality or pixel size, you need a separate route with an API key (pay as you go). This skill never switches to it without your consent.
 
-## 使う前に知っておいてほしいこと
+## Before you use it
 
-### ClaudeとCodex、両方の利用枠を使います
+### It uses both Claude and Codex quota
 
-Claudeでのやり取りに加えて、Codex側でも処理が走ります。修正を繰り返すと、その分の利用量も増えます。スキル自体は無料ですが、各サービスの利用が無料になるわけではありません。
+Codex does work on top of your conversation with Claude, and every revision adds to that usage. The skill is free, but the services are not.
 
-このスキルはCodexの内蔵画像生成ツールを使う前提です。画像生成API用のキーを別途登録する手順は含みません。料金や利用上限は、ご自身の契約と各サービスの最新の案内を確認してください。画像生成が使えない場合に、別のAPI課金へ自動で切り替えることはしません。
+The skill assumes Codex's built-in image tool. It has no steps for registering a separate image API key. Check your own plan and each service's current terms for pricing and limits. If image generation isn't available, it does not fall back to a paid API on its own.
 
-### 依頼文と参照画像は外部サービスで処理されます
+### Requests and reference images are processed by outside services
 
-ローカルでコマンドを実行しますが、画像生成までパソコン内だけで完結する仕組みではありません。生成の依頼文や参照画像はOpenAI側で処理され、Claudeが画像を確認する際にも、Claudeの利用環境に応じて処理されます。顧客情報、個人情報、未公開資料などは、所属先のルールと各サービスの設定を確認してから扱ってください。
+Commands run locally, but image generation does not stay on your computer. Prompts and reference images are processed by OpenAI, and the images Claude checks are processed according to your Claude setup. Check your organization's rules and each service's settings before using customer data, personal information or unreleased material.
 
-Codexは手元の設定と権限で起動します。`workspace-write` は書き込みを制限する設定であり、作業フォルダ外のファイルを一切読めなくする保証ではありません。共有できないファイルがある環境では、作業場所と設定を確認してください。
+Codex starts with your local settings and permissions. `workspace-write` limits where Codex can write; it does not guarantee that Codex can't read files outside the working folder. If you have files that must not be shared, check the working folder and settings.
 
-### 生成には数分かかることがあります
+### Generation can take a few minutes
 
-スキルでは、コマンドの待ち時間を10分にするよう案内しています。必ず10分以内に終わるという意味ではありません。
+The skill tells Claude to wait up to 10 minutes per command. That doesn't mean it always finishes within 10 minutes.
 
-待ち時間を超えても、処理が続いている場合があります。同じ画像を重複して生成しないよう、再実行する前に処理の状態と保存先を確認します。
+The work may still be running after the wait ends. To avoid generating the same image twice, Claude checks the process and the save location before trying again.
 
-### 画像は最後に自分でも確認してください
+### Check the image yourself at the end
 
-Claudeも画像を確認しますが、文字の誤りや不自然な描写をすべて見つけられるとは限りません。特に日本語の文字、要素の数、細部の形は、使用前に見直してください。図解に含まれる数値や説明の正しさも、画像の見た目とは別に確認が必要です。
+Claude checks the image, but it may not catch every wrong character or odd detail. Look again at any Japanese text, the number of elements and fine shapes before using an image. Numbers and explanations in a diagram need checking separately from how it looks.
 
-### 保存先と上書きに注意してください
+### Mind where it saves and overwriting
 
-保存先とファイル名を指定すると、生成後に探しやすくなります。指定がない場合は、Claudeが作業中のプロジェクト内に保存先を用意します。修正版は原則として別名で保存します。
+Giving a save location and file name makes the result easy to find. If you don't, Claude sets one up in the project you're working in. Revised versions are saved under a new name by default.
 
-### Codex側に残るもの
+### What Codex leaves behind
 
-Codexは通常、やり取りを会話として保存し、作った画像もその中にまるごと残します。1回で数MB〜数十MBになるため、このスキルは `codex exec --ephemeral` で呼び出し、会話を残さないようにしています。
+Normally Codex saves each exchange as a conversation, with the generated image embedded in it. That can be several MB to tens of MB per call, so this skill calls `codex exec --ephemeral` to keep the conversation from being saved.
 
-それでも、Codexは画像の写しを `~/.codex/generated_images/` に残します。このスキルでは、Claudeが画像を確認したあと、保存先の画像と中身がまったく同じ写しだけを、付属の `scripts/trash_codex_copies.py` でmacOSのゴミ箱へ移します。完全には削除しないので、ゴミ箱を空にするまではディスクの空きは増えません。共有端末では、ゴミ箱の扱いも確認してください。
+Codex still leaves a copy of each image in `~/.codex/generated_images/`. After checking the image, Claude uses the bundled `scripts/trash_codex_copies.py` to move only the copies that are byte-for-byte identical to the saved images into the macOS Trash. Nothing is deleted outright, so disk space comes back only after you empty the Trash. On shared machines, keep that in mind. If there is no Trash (`~/.Trash`), the helper stops without moving anything.
 
-## うまく動かないとき
+## Troubleshooting
 
-| 状況 | 確認すること |
+| Problem | What to check |
 | --- | --- |
-| スキルが見つからない | `~/.claude/skills/imagegen-via-codex/SKILL.md` があるか確認し、Claude Codeで新しいセッションを開きます。 |
-| `codex: command not found` と出る | Claude Codeが使う実行環境から、`codex --version` が通るか確認します。 |
-| ログインエラーが出る | `codex login status` を確認し、必要なら自分で `codex login` を実行します。認証情報をチャットやIssueに貼らないでください。 |
-| 画像生成ツールを使えないと言われる | Codex単体で同じ画像を生成できるか確認します。CLIのバージョンや設定、アカウントによって利用できない場合があります。 |
-| 保存できない | 保存先フォルダの存在と書き込み権限を確認します。保護を一括解除するオプションは、このスキルの手順に含めていません。 |
-| 時間切れになった | 元の処理が終わっているか、画像が保存されていないかを確認してから再実行します。 |
-| 警告やエラーらしい表示が出た | 表示だけで判断せず、処理の終了状態と今回の出力画像を確認します。 |
+| The skill isn't found | Check that `~/.claude/skills/imagegen-via-codex/SKILL.md` exists, then open a new Claude Code session. |
+| `codex: command not found` | Check that `codex --version` works from the environment Claude Code uses. |
+| Login errors | Check `codex login status` and run `codex login` yourself if needed. Don't paste credentials into chats or issues. |
+| "The image tool isn't available" | Check whether Codex alone can generate the same image. Availability depends on CLI version, settings and account. |
+| It can't save | Check that the folder exists and is writable. Options that turn off protections wholesale are not part of this skill's steps. |
+| It timed out | Check whether the original run finished or already saved the image before running again. |
+| Warnings or error-looking messages | Don't judge by the message alone; check the exit status and this run's output image. |
 
-解決しない場合は、[Issues](https://github.com/mocchicc/imagegen-via-codex/issues)にOS、Claude CodeとCodex CLIのバージョン、起きたことを記載してください。ログを貼る場合は、認証情報や個人のパス、依頼に含まれる非公開情報を取り除いてください。
+If that doesn't help, open an [issue](https://github.com/mocchicc/imagegen-via-codex/issues) with your OS, the Claude Code and Codex CLI versions, and what happened. If you paste logs, remove credentials, personal paths and anything private in your request.
 
-## 動作確認について
+## Testing notes
 
-元のスキルには、2026年8月10日にmacOS・Codex CLI 0.144.1で、柴犬の水彩画像を生成し、Claude側で読み取るところまで確認した記録があります。
+The original skill records a test on August 10, 2026 (macOS, Codex CLI 0.144.1): generating a watercolor shiba image and reading it from Claude.
 
-2026年9月26日には、macOS・Codex CLI 0.157.1・ChatGPTログインの環境で、公開版と同じ `codex exec` の呼び出し方を確認しました。内蔵画像生成ツールでPNG画像を1枚生成し、指定先への保存と画像の表示・内容を確認しています。使い方の節に掲載した柴犬の画像が、そのときの出力です（1254 × 1254ピクセル）。
+On September 26, 2026 (macOS, Codex CLI 0.157.1, ChatGPT login), I tested the same `codex exec` call as the published version: one PNG from the built-in image tool, saved to the given path, then viewed and checked. The shiba image in the usage section is that output (1254 × 1254 px).
 
-同日、プロンプトを項目ごとに整理する形式に改良した版でも、横長16:9の水彩イラストを1枚生成しました（1672 × 941ピクセル）。縦横比、被写体の数と位置、余白、文字なしの指定が反映されていることを確認しています。参考画像を渡す手順（`--image`）は、改良版では再検証していません。
+The same day, with the improved version that organizes prompts into labeled items, I generated a 16:9 watercolor (1672 × 941 px) and confirmed that the aspect ratio, number and position of subjects, empty space and no-text instruction were all followed.
 
-2026年10月26日には、macOS・Codex CLI 0.160.0で、`--ephemeral` を付けた呼び出しを確認しました。新しく生成する画像と、参考画像を渡して直す画像をそれぞれ1枚、4枚の同時生成を1回試しました。どの回も画像は指定先に保存され、Codexの会話一覧・会話の記録・履歴のデータベースには残りませんでした。残った画像の写しは `trash_codex_copies.py` でゴミ箱へ移し、保存先と中身が違う写しには触れないことも確認しています。
+On October 26, 2026 (macOS, Codex CLI 0.160.0), I tested calls with `--ephemeral`: one new image, one revision of a reference image passed with `--image`, and one batch of four images generated at once. Every image was saved to the given path, and nothing was left in Codex's conversation list, conversation records or history database. In the reference edit, only the time of day changed; the subject's shape, position and composition stayed the same. The remaining copies were moved to the Trash with `trash_codex_copies.py`, and copies whose contents differed from the saved files were left alone.
 
-作者の実利用例として、Claudeからのポスター生成と、そのポスターを参考画像にした販促スライドの完成結果も掲載しています。これらは上記のコマンド確認とは別の記録です。公開版をClaude Codeから呼び出す一連の操作と、Windows・Linuxでの動作は再検証していません。
+The poster and the promo slide made from it are examples from my own use, separate from the command tests above. I have not re-tested the full flow of invoking the published skill from Claude Code, or running it on Windows or Linux.
 
-## ライセンスとこのスキルの位置づけ
+## License and status
 
-[MIT License](LICENSE)で公開しています。スキルのコピー、変更、再配布ができます。再配布するときは、ライセンスと著作権の表示を残してください。
+Released under the [MIT License](LICENSE). You may copy, modify and redistribute the skill; keep the license and copyright notice when you do.
 
-このライセンスはリポジトリ内のスキルと文書に適用されます。ClaudeやCodexなどのサービスの利用条件、生成した画像の扱いは、各サービスの条件も確認してください。
+The license covers the skill and documents in this repository. For Claude, Codex and the images you generate, also check each service's terms.
 
-個人が作成した非公式のスキルです。AnthropicやOpenAIの公式提供・推奨を示すものではありません。
+This is an unofficial skill made by an individual. It is not provided or endorsed by Anthropic or OpenAI.
